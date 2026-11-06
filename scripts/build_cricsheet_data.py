@@ -10,7 +10,7 @@ Outputs:
     01_Dataset/Processed/deliveries.csv
 
 Source: https://cricsheet.org/downloads/ipl_json.zip
-Data attribution: Cricsheet (CC BY 4.0). Keep the attribution in this repository.
+Data attribution: Cricsheet (Open Data Commons Attribution License 1.0, ODC-BY). Keep the attribution in this repository.
 """
 from __future__ import annotations
 
