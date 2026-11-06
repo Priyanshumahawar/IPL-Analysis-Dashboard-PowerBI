@@ -1,0 +1,97 @@
+/*
+IPL Power BI starter measures.
+IMPORTANT: These measures assume a normalized Deliveries table with the columns below.
+Rename columns or adapt formulas to your actual source. Validate all cricket scoring rules.
+*/
+
+Total Runs =
+SUM ( Deliveries[total_runs] )
+
+Batter Runs =
+SUM ( Deliveries[batsman_runs] )
+
+Total Matches =
+DISTINCTCOUNT ( Matches[match_id] )
+
+Matches Won =
+CALCULATE (
+    DISTINCTCOUNT ( Matches[match_id] ),
+    NOT ISBLANK ( Matches[winner] )
+)
+
+Total Wicket Events =
+CALCULATE (
+    COUNTROWS ( Deliveries ),
+    Deliveries[is_wicket] = 1
+)
+
+-- Create a calculated column after confirming the extras_type values:
+Legal Ball =
+IF (
+    Deliveries[extras_type] = "wides"
+        || Deliveries[extras_type] = "noballs",
+    0,
+    1
+)
+
+Legal Balls =
+SUM ( Deliveries[Legal Ball] )
+
+-- Basic approximation: adapt if your source has a dedicated batter-ball-faced field.
+Balls Faced =
+CALCULATE (
+    COUNTROWS ( Deliveries ),
+    Deliveries[extras_type] <> "wides"
+)
+
+Batting Strike Rate =
+DIVIDE ( [Batter Runs] * 100, [Balls Faced], 0 )
+
+-- Bowler wickets: use only bowler-credit dismissals.
+-- Confirm exact dismissal-kind spelling in your data before using this measure.
+Bowler Wickets =
+CALCULATE (
+    COUNTROWS ( Deliveries ),
+    Deliveries[is_wicket] = 1,
+    NOT ( Deliveries[dismissal_kind] IN {
+        "run out",
+        "retired hurt",
+        "retired out",
+        "obstructing the field"
+    } )
+)
+
+-- Bowling runs conceded must exclude byes and leg-byes, and should follow
+-- the official scorer/source convention for penalty runs and other extras.
+Bowler Runs Conceded =
+SUM ( Deliveries[batsman_runs] )
+    + CALCULATE (
+        SUM ( Deliveries[extra_runs] ),
+        NOT ( Deliveries[extras_type] IN { "byes", "legbyes" } )
+    )
+
+Bowling Economy =
+DIVIDE ( [Bowler Runs Conceded] * 6, [Legal Balls], 0 )
+
+Team Wins =
+VAR SelectedTeam = SELECTEDVALUE ( Teams[team_name] )
+RETURN
+CALCULATE (
+    COUNTROWS ( Matches ),
+    Matches[winner] = SelectedTeam
+)
+
+Team Win Percentage =
+DIVIDE ( [Team Wins], [Matches Played by Team], 0 )
+
+Matches Played by Team =
+VAR SelectedTeam = SELECTEDVALUE ( Teams[team_name] )
+RETURN
+CALCULATE (
+    COUNTROWS ( Matches ),
+    FILTER (
+        Matches,
+        Matches[team1] = SelectedTeam
+            || Matches[team2] = SelectedTeam
+    )
+)
