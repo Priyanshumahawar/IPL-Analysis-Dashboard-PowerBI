@@ -5,7 +5,7 @@ Use Cricsheet's official downloads page: https://cricsheet.org/downloads/
 
 Choose **Indian Premier League → Men → JSON**. The current competition archive includes match files across the available IPL seasons. The Cricsheet downloads page lists 1,243 IPL matches at the time this project was prepared. Coverage can change as records are updated.
 
-Cricsheet data is licensed under **CC BY 4.0**. Attribute Cricsheet as the source and follow the license terms:
+Cricsheet's JSON match data is licensed under the **Open Data Commons Attribution License 1.0 (ODC-BY)**. The XML data has a separate CC BY 4.0 license; this project uses JSON. Attribute Cricsheet as the source and follow the license terms:
 - https://cricsheet.org/
 - https://creativecommons.org/licenses/by/4.0/
 
