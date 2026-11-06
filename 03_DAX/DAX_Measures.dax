@@ -1,97 +1,129 @@
 /*
-IPL Power BI starter measures.
-IMPORTANT: These measures assume a normalized Deliveries table with the columns below.
-Rename columns or adapt formulas to your actual source. Validate all cricket scoring rules.
+IPL Analysis Dashboard — DAX starter measures
+Tables: Matches, Deliveries
+The column names below match scripts/build_cricsheet_data.py.
+Create a disconnected Teams table using:
+Teams =
+DISTINCT (
+    UNION (
+        SELECTCOLUMNS ( Matches, "team", Matches[team1] ),
+        SELECTCOLUMNS ( Matches, "team", Matches[team2] )
+    )
+)
+Use Teams[team] for team-level slicers and axes.
 */
-
-Total Runs =
-SUM ( Deliveries[total_runs] )
-
-Batter Runs =
-SUM ( Deliveries[batsman_runs] )
 
 Total Matches =
 DISTINCTCOUNT ( Matches[match_id] )
 
-Matches Won =
+Matches With Result =
 CALCULATE (
     DISTINCTCOUNT ( Matches[match_id] ),
     NOT ISBLANK ( Matches[winner] )
 )
 
-Total Wicket Events =
+Total Runs =
 CALCULATE (
-    COUNTROWS ( Deliveries ),
-    Deliveries[is_wicket] = 1
+    SUM ( Deliveries[total_runs] ),
+    Deliveries[is_super_over] = 0
 )
 
--- Create a calculated column after confirming the extras_type values:
-Legal Ball =
-IF (
-    Deliveries[extras_type] = "wides"
-        || Deliveries[extras_type] = "noballs",
-    0,
-    1
+Batter Runs =
+CALCULATE (
+    SUM ( Deliveries[batter_runs] ),
+    Deliveries[is_super_over] = 0
+)
+
+Wicket Events =
+CALCULATE (
+    SUM ( Deliveries[is_wicket] ),
+    Deliveries[is_super_over] = 0
+)
+
+Bowler Credit Wickets =
+CALCULATE (
+    SUM ( Deliveries[is_bowler_credit_wicket] ),
+    Deliveries[is_super_over] = 0
 )
 
 Legal Balls =
-SUM ( Deliveries[Legal Ball] )
-
--- Basic approximation: adapt if your source has a dedicated batter-ball-faced field.
-Balls Faced =
 CALCULATE (
-    COUNTROWS ( Deliveries ),
-    Deliveries[extras_type] <> "wides"
+    SUM ( Deliveries[is_legal_ball] ),
+    Deliveries[is_super_over] = 0
+)
+
+Batter Balls Faced =
+CALCULATE (
+    SUM ( Deliveries[batter_ball_faced] ),
+    Deliveries[is_super_over] = 0
 )
 
 Batting Strike Rate =
-DIVIDE ( [Batter Runs] * 100, [Balls Faced], 0 )
+DIVIDE ( [Batter Runs] * 100, [Batter Balls Faced], 0 )
 
--- Bowler wickets: use only bowler-credit dismissals.
--- Confirm exact dismissal-kind spelling in your data before using this measure.
-Bowler Wickets =
-CALCULATE (
-    COUNTROWS ( Deliveries ),
-    Deliveries[is_wicket] = 1,
-    NOT ( Deliveries[dismissal_kind] IN {
-        "run out",
-        "retired hurt",
-        "retired out",
-        "obstructing the field"
-    } )
-)
-
--- Bowling runs conceded must exclude byes and leg-byes, and should follow
--- the official scorer/source convention for penalty runs and other extras.
 Bowler Runs Conceded =
-SUM ( Deliveries[batsman_runs] )
-    + CALCULATE (
-        SUM ( Deliveries[extra_runs] ),
-        NOT ( Deliveries[extras_type] IN { "byes", "legbyes" } )
-    )
+CALCULATE (
+    SUM ( Deliveries[bowler_runs] ),
+    Deliveries[is_super_over] = 0
+)
 
 Bowling Economy =
 DIVIDE ( [Bowler Runs Conceded] * 6, [Legal Balls], 0 )
 
 Team Wins =
-VAR SelectedTeam = SELECTEDVALUE ( Teams[team_name] )
+VAR SelectedTeam = SELECTEDVALUE ( Teams[team] )
 RETURN
 CALCULATE (
-    COUNTROWS ( Matches ),
-    Matches[winner] = SelectedTeam
+    DISTINCTCOUNT ( Matches[match_id] ),
+    FILTER ( ALL ( Matches ), Matches[winner] = SelectedTeam )
 )
 
-Team Win Percentage =
-DIVIDE ( [Team Wins], [Matches Played by Team], 0 )
-
-Matches Played by Team =
-VAR SelectedTeam = SELECTEDVALUE ( Teams[team_name] )
+Team Matches Played =
+VAR SelectedTeam = SELECTEDVALUE ( Teams[team] )
 RETURN
 CALCULATE (
-    COUNTROWS ( Matches ),
+    DISTINCTCOUNT ( Matches[match_id] ),
     FILTER (
-        Matches,
+        ALL ( Matches ),
         Matches[team1] = SelectedTeam
             || Matches[team2] = SelectedTeam
     )
 )
+
+Team Win Percentage =
+DIVIDE ( [Team Wins], [Team Matches Played], 0 ) * 100
+
+Toss Wins =
+CALCULATE (
+    DISTINCTCOUNT ( Matches[match_id] ),
+    NOT ISBLANK ( Matches[toss_winner] )
+)
+
+Toss Winner Also Won =
+CALCULATE (
+    DISTINCTCOUNT ( Matches[match_id] ),
+    FILTER (
+        Matches,
+        NOT ISBLANK ( Matches[toss_winner] )
+            && Matches[toss_winner] = Matches[winner]
+    )
+)
+
+Toss Conversion Percentage =
+DIVIDE ( [Toss Winner Also Won], [Toss Wins], 0 ) * 100
+
+Matches Batting First =
+CALCULATE (
+    DISTINCTCOUNT ( Matches[match_id] ),
+    Matches[toss_decision] = "bat"
+)
+
+Matches Choosing Field =
+CALCULATE (
+    DISTINCTCOUNT ( Matches[match_id] ),
+    Matches[toss_decision] = "field"
+)
+
+-- For batting/bowling leaderboards, place Deliveries[batter] or
+-- Deliveries[bowler] on the visual axis and apply a sensible minimum
+-- balls-faced / legal-balls filter before comparing rates.
