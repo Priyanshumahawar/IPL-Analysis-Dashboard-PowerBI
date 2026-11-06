@@ -1,0 +1,1 @@
+Save your completed Power BI report in this folder as IPL_Analysis_Dashboard.pbix. This is a placeholder, not a Power BI report.
