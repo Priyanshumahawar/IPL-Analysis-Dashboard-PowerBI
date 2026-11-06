@@ -75,7 +75,7 @@ VAR SelectedTeam = SELECTEDVALUE ( Teams[team] )
 RETURN
 CALCULATE (
     DISTINCTCOUNT ( Matches[match_id] ),
-    FILTER ( ALL ( Matches ), Matches[winner] = SelectedTeam )
+    FILTER ( Matches, Matches[winner] = SelectedTeam )
 )
 
 Team Matches Played =
