@@ -21,7 +21,7 @@ The script downloads Cricsheet's IPL JSON archive and creates:
 - `01_Dataset/Processed/matches.csv`
 - `01_Dataset/Processed/deliveries.csv`
 
-Cricsheet data is licensed under CC BY 4.0. Credit Cricsheet and follow its attribution terms. See the guide for metric definitions and limitations.
+Cricsheet's JSON match data is licensed under the Open Data Commons Attribution License 1.0 (ODC-BY). The XML data has a separate CC BY 4.0 license; this project uses JSON. Credit Cricsheet and follow its attribution terms. See the guide for metric definitions and limitations.
 
 ## Import into Power BI
 1. Open Power BI Desktop.
