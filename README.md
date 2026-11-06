@@ -1,47 +1,63 @@
 # IPL Analysis Dashboard using Power BI (2008–2026)
 
-An educational Power BI project template for exploring IPL match outcomes, team performance, batting and bowling statistics, toss decisions, venues and season trends.
+An educational cricket analytics project built around Microsoft Power BI, Power Query and DAX. The goal is to explore IPL match results, team performance, player batting/bowling metrics, toss decisions, venues and season trends.
 
-> **Current status:** This GitHub repository contains the project documentation, starter DAX, Power Query guidance and CSV schema templates. It does **not** yet contain populated IPL datasets or a finished Power BI `.pbix` report. The CSV templates contain headers only.
+## Current repository status
+- Project documentation, dashboard blueprint, Power Query starter and DAX measures are committed.
+- The repository includes reference match-level files for IPL 2026.
+- The full historical ball-by-ball data is generated locally from Cricsheet using the script in `scripts/`.
+- **A finished Power BI `.pbix` report is not included yet.** Power BI Desktop is required to load the data, create the visuals and save the report.
+
+## Build the full dataset
+1. Open `01_Dataset/CRICSHEET_DOWNLOAD_GUIDE.md`.
+2. Download the men's Indian Premier League JSON archive from Cricsheet: https://cricsheet.org/downloads/
+3. From the repository root run:
+
+```bash
+python scripts/build_cricsheet_data.py
+```
+
+The script downloads Cricsheet's IPL JSON archive and creates:
+- `01_Dataset/Processed/matches.csv`
+- `01_Dataset/Processed/deliveries.csv`
+
+Cricsheet data is licensed under CC BY 4.0. Credit Cricsheet and follow its attribution terms. See the guide for metric definitions and limitations.
+
+## Import into Power BI
+1. Open Power BI Desktop.
+2. Import both processed CSV files using **Get Data → Text/CSV**.
+3. Create a one-to-many relationship: `Matches[match_id]` → `Deliveries[match_id]`.
+4. Add the measures in `03_DAX/DAX_Measures.dax`.
+5. Follow `02_PowerBI/Dashboard_Blueprint.md` to build the report pages.
+6. Save as `02_PowerBI/IPL_Analysis_Dashboard.pbix`.
 
 ## Dashboard pages
-1. **Overview** — matches, seasons, runs, wicket events and season trends.
-2. **Batting** — leading run scorers, strike rate, boundaries and sixes.
-3. **Bowling** — bowler-credited wickets, economy and legal balls.
-4. **Teams & venues** — team wins, win percentage and venue comparisons.
-5. **Toss & match insights** — toss decisions and match outcomes.
+1. Overview — matches, seasons, runs, wickets and season trends.
+2. Batting — run scorers, strike rate and batter comparisons.
+3. Bowling — bowler-credit wickets, economy and bowling comparisons.
+4. Teams & venues — wins, win percentage and venue performance.
+5. Toss insights — toss decisions and match outcomes.
 
 ## Repository structure
-- `01_Dataset/` — dataset instructions and target CSV schemas.
-- `02_PowerBI/` — dashboard blueprint; save the finished PBIX report here.
-- `03_DAX/` — starter DAX measures.
-- `04_Documentation/` — data dictionary, Power Query guide, project report and resume description.
+- `01_Dataset/` — dataset instructions, schema templates, reference files and processed-data output folder.
+- `02_PowerBI/` — report blueprint and Power Query M starter.
+- `03_DAX/` — DAX measures.
+- `04_Documentation/` — data dictionary, build guide, project report and resume description.
 - `05_Screenshots/` — add genuine screenshots after building the report.
+- `scripts/` — Cricsheet data preparation script.
 
-## Getting started
-1. Download match-level and ball-by-ball data from a source listed in `01_Dataset/DATA_DOWNLOAD_INSTRUCTIONS.md`.
-2. Keep original data in a `Raw` folder and cleaned data in a `Cleaned` folder.
-3. Import the data into Power BI Desktop using **Get Data → Text/CSV**.
-4. Standardize columns and data types using the Power Query guide.
-5. Create the relationship `Matches[match_id]` (1) to `Deliveries[match_id]` (*).
-6. Adapt the measures in `03_DAX/DAX_Measures.dax` to the actual source schema.
-7. Build the report pages described in `02_PowerBI/Dashboard_Blueprint.md`.
-8. Validate totals against scorecards, save as `02_PowerBI/IPL_Analysis_Dashboard.pbix`, and add screenshots.
+## Important metric notes
+- Legal balls exclude wides and no-balls.
+- Batter balls faced exclude wides and include no-balls.
+- Bowler runs exclude byes, leg-byes and penalty runs.
+- Bowler-credit wickets include bowled, caught, caught and bowled, lbw, stumped and hit wicket.
+- Super overs are flagged separately and excluded from standard match metrics in the starter measures.
+- Team names, venues and match records can be revised by data providers; validate key totals against scorecards.
 
-## Data and calculation cautions
-- Check each dataset's coverage, schema and license before use; the listed sources may differ.
-- Legal balls exclude wides and no-balls. Batter balls faced and bowler runs conceded follow specific scoring rules.
-- Not every dismissal is credited to the bowler; exclude run-outs and other non-bowler dismissals from bowler wicket totals.
-- Identify super overs separately and standardize franchise names across seasons.
-- Verify champion records independently; most league-stage wins do not automatically mean the season title.
+## References
+- Cricsheet downloads: https://cricsheet.org/downloads/
+- Cricsheet data format: https://cricsheet.org/format/
+- Cricsheet license: https://creativecommons.org/licenses/by/4.0/
+- openIPL 2026 reference data: https://github.com/sachin-dul/openIPL
 
-## Dataset references
-- Historical IPL (2008–2024): https://github.com/waquararshadkhan/ipl-analytics
-- IPL 2026 structured data: https://github.com/sachin-dul/openIPL
-- Alternative IPL 2026 ball-by-ball data: https://github.com/heisenricher/IPL-2026-BALL-BY-BALL-DATA-
-- Cricsheet: https://cricsheet.org/
-
-Follow each provider's license and attribution requirements. This is an independent educational project and is not affiliated with or endorsed by the BCCI or IPL.
-
-## Skills demonstrated
-Power BI · Power Query · DAX · Data Cleaning · Data Modeling · Data Visualization · Cricket Analytics
+IPL is a trademark of the BCCI. This independent educational project is not affiliated with or endorsed by the BCCI or IPL.
