@@ -5,7 +5,7 @@ Use Cricsheet's Indian Premier League men's JSON archive: https://cricsheet.org/
 
 On the downloads page, choose **Indian Premier League → Men → JSON**. Cricsheet's page lists the archive by competition and year. The current archive is the source of truth for the latest available match coverage.
 
-Cricsheet data is licensed under **CC BY 4.0**. Keep attribution to Cricsheet and follow the license terms. The project is independent and is not affiliated with the BCCI or IPL.
+Cricsheet's JSON match data is licensed under the **Open Data Commons Attribution License 1.0 (ODC-BY)**. The XML match data is separately licensed under CC BY 4.0; this project uses JSON, not XML. Keep attribution to Cricsheet and follow the license terms. The project is independent and is not affiliated with the BCCI or IPL.
 
 ## Generate Power BI CSV files
 1. Install Python 3.10 or newer.
